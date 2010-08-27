@@ -1,5 +1,3 @@
-== DESCRIPTION:
-
 Rails3-amf is a Rails 3 plugin that aims to do what RubyAMF did for Rails 2. It
 provides extensively customizable ActiveRecord serialization support, simple
 configuration, and allows AMF calls to any controller you choose. It uses
@@ -16,6 +14,20 @@ rails3-amf to work properly.
 
   gem 'RocketAMF', :git => 'git://github.com/warhammerkid/rocket-amf.git'
   gem 'rails3-amf', :git => 'git://github.com/warhammerkid/rails3-amf.git'
+
+Then, make sure that your controller will respond to amf by adding <tt>:amf</tt>
+to your respond_to, and you should be all ready to go. ActiveRecord objects will automatically be serialized with all attributes and no relations, but that can be easilly adjusted through the standard serialization options for ActiveRecord and ActiveModel serialization.
+
+  class UserController < ApplicationController
+    respond_to :html, :amf
+  
+    def getUser
+      @user = User.first
+      respond_with(@user) do |format|
+        format.amf { render :amf => @user.to_amf(:except => [:updated_at, :created_at], :include => [:courses]) }
+      end
+    end
+  end
 
 
 == LICENSE:
