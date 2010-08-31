@@ -2,7 +2,8 @@ Rails3-amf is a Rails 3 plugin that aims to do what RubyAMF did for Rails 2. It
 provides extensively customizable ActiveRecord serialization support, simple
 configuration, and allows AMF calls to any controller you choose. It uses
 RocketAMF for serialization, providing users with a proven AMF0/3 serializer and
-deserializer.
+deserializer. Because of this, it's also fully Ruby 1.9 compatible out of the
+box.
 
 
 == GETTING STARTED:
