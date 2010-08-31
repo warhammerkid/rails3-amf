@@ -49,6 +49,12 @@ module Rails3AMF
       new_env['HTTP_ACCEPT'] = Mime::AMF.to_s # Force amf response
       req = ActionDispatch::Request.new(new_env)
 
+      # Merge in argument parameters and handle mapped parameters if specified
+      arg_params = {}
+      args.each_with_index {|obj, i| arg_params[i] = obj}
+      req.params.merge!(arg_params)
+      req.params.merge!(@config.mapped_params(controller_name, method_name, args))
+
       # Run it
       response = controller.new.dispatch(method_name, req)
       return response[2].body_parts # Object to serialize is the body of the response
