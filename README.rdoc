@@ -16,7 +16,11 @@ rails3-amf to work properly.
   gem 'rails3-amf', :git => 'git://github.com/warhammerkid/rails3-amf.git'
 
 Then, make sure that your controller will respond to amf by adding <tt>:amf</tt>
-to your respond_to, and you should be all ready to go. ActiveRecord objects will automatically be serialized with all attributes and no relations, but that can be easilly adjusted through the standard serialization options for ActiveRecord and ActiveModel serialization.
+to your respond_to, and you should be all ready to go with an AMF gateway
+available at http://your-site.com/amf. ActiveRecord objects will automatically
+be serialized with all attributes and no relations, but that can be easilly
+adjusted through the standard serialization options for ActiveRecord and
+ActiveModel serialization.
 
   class UserController < ApplicationController
     respond_to :html, :amf
@@ -28,6 +32,23 @@ to your respond_to, and you should be all ready to go. ActiveRecord objects will
       end
     end
   end
+
+
+== CONFIGURATION:
+
+Rails3-amf has several configuration options. The gateway path, which defaults
+to "/amf" can be changed to anything you choose. You can map method call
+arguments by index to named params in your controllers. Finally, there's the
+ability to specify flash->ruby class name mappings.
+
+Example:
+
+  config.rails3amf.gateway_path = "/rubyamf/gateway"
+  config.rails3amf.class_mapping do |m|
+    m.map :as => 'Test::User', :ruby => 'User'
+    m.map :as => 'vo.Course', :ruby => 'Course'
+  end
+  config.rails3amf.map_params :controller => 'UserController', :action => 'getUser', :params => [:session_id]
 
 
 == LICENSE:
