@@ -3,6 +3,15 @@ require 'rake'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
 
+require 'spec/rake/spectask'
+
+desc 'Default: run the specs.'
+task :default => :spec
+
+Spec::Rake::SpecTask.new do |t|
+  t.spec_opts = ['--options', 'spec/spec.opts']
+end
+
 spec = Gem::Specification.new do |s|
   s.name    = 'rails3-amf'
   s.version = '0.1.0'

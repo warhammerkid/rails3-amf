@@ -1,3 +1,5 @@
+require 'active_support/dependencies'
+
 module Rails3AMF
   class RequestProcessor
     def initialize app, config={}, logger=nil
@@ -27,37 +29,46 @@ module Rails3AMF
     end
 
     def handle_method method, args, env
+      # Parse method and load service
       path = method.split('.')
       method_name = path.pop
       controller_name = path.pop
+      controller = get_service controller_name, method_name
 
-      # Get the service
+      # Create rack request
+      new_env = env.dup
+      new_env['HTTP_ACCEPT'] = Mime::AMF.to_s # Force amf response
+      req = ActionDispatch::Request.new(new_env)
+      req.params.merge!(build_params(controller_name, method_name, args))
+
+      # Run it
+      response = controller.new.dispatch(method_name, req)
+      return response[2].body_parts # Object to serialize is the body of the response
+    end
+
+    def get_service controller_name, method_name
+      # Check controller and validate against hacking attempts
       begin
-        # Hopefully the following two checks are enough to prevent hacking...
         raise "not controller" unless controller_name =~ /^[A-Za-z:]+Controller$/
         controller = ActiveSupport::Dependencies.ref(controller_name).get
         raise "not controller" unless controller.respond_to?(:controller_name) && controller.respond_to?(:action_methods)
       rescue Exception => e
         raise "Service #{controller_name} does not exist"
       end
+
+      # Check action
       unless controller.action_methods.include?(method_name)
         raise "Service #{controller_name} does not respond to #{method_name}"
       end
 
-      # Create rack request
-      new_env = env.dup
-      new_env['HTTP_ACCEPT'] = Mime::AMF.to_s # Force amf response
-      req = ActionDispatch::Request.new(new_env)
+      return controller
+    end
 
-      # Merge in argument parameters and handle mapped parameters if specified
-      arg_params = {}
-      args.each_with_index {|obj, i| arg_params[i] = obj}
-      req.params.merge!(arg_params)
-      req.params.merge!(@config.mapped_params(controller_name, method_name, args))
-
-      # Run it
-      response = controller.new.dispatch(method_name, req)
-      return response[2].body_parts # Object to serialize is the body of the response
+    def build_params controller_name, method_name, args
+      params = {}
+      args.each_with_index {|obj, i| params[i] = obj}
+      params.merge!(@config.mapped_params(controller_name, method_name, args))
+      params
     end
   end
 end

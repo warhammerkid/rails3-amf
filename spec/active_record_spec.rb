@@ -1,0 +1,89 @@
+require File.dirname(__FILE__) + '/spec_helper.rb'
+
+describe "Rails3AMF activerecord additions" do
+  before :all do
+    # If we replace columns, we don't need a DB connection - YEAH!!!
+    class User < ActiveRecord::Base
+      def self.columns
+        unless defined?(@columns) && @columns
+          @columns = []
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("id", nil, "INTEGER")
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("username", nil, "varchar(255)")
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("password", nil, "varchar(255)")
+          @columns[0].primary = true
+        end
+        @columns
+      end
+
+      has_many :courses
+    end
+
+    class Course < ActiveRecord::Base
+      def self.columns
+        unless defined?(@columns) && @columns
+          @columns = []
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("id", nil, "INTEGER")
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("user_id", nil, "INTEGER")
+          @columns << ActiveRecord::ConnectionAdapters::Column.new("name", nil, "varchar(255)")
+          @columns[0].primary = true
+        end
+        @columns
+      end
+    end
+
+    class Rails3AMF::IntermediateModel
+      attr_accessor :model, :props
+    end
+  end
+
+  before :each do
+    @user = User.new :username => "user", :password => "pass"
+    User.stub!(:reflect_on_association).and_return(mock("association", :macro => :has_many))
+    @user.stub!(:courses).and_return([Course.new(:name => "science")])
+  end
+
+  it "should serialize to intermediate form" do
+    intermediate = @user.to_amf
+    intermediate.should be_a(Rails3AMF::IntermediateModel)
+    intermediate.model.should == @user
+    intermediate.props.should == {"username" => "user", "password" => "pass"}
+  end
+
+  it "should support relations in serialization" do
+    intermediate = @user.to_amf :include => "courses"
+    courses = intermediate.props["courses"]
+    courses.length.should == 1
+    courses[0].should be_a(Rails3AMF::IntermediateModel)
+  end
+
+  it "should encode to amf properly if not yet in intermediate form" do
+    @user.should_receive(:to_amf).and_return(mock(Rails3AMF::IntermediateModel, :encode_amf => "success"))
+    result = @user.encode_amf(mock("Serializer", :version => 3))
+    result.should == "success"
+  end
+
+  it "should encode to AMF0 properly" do
+    RocketAMF::ClassMapper.define {|m| m.map :as => "User", :ruby => "User"}
+
+    output = RocketAMF.serialize(@user.to_amf(:include => "courses"), 0)
+
+    fixture = File.open(File.dirname(__FILE__) + '/fixtures/amf0-ar.dat').read
+    fixture.force_encoding("ASCII-8BIT") if fixture.respond_to?(:force_encoding)
+    output.should == fixture
+
+    RocketAMF::ClassMapper.reset
+  end
+
+  it "should encode to AMF3 properly and cache traits" do
+    RocketAMF::ClassMapper.define {|m| m.map :as => "User", :ruby => "User"}
+
+    output = RocketAMF.serialize(@user.to_amf(:include => "courses"), 3)
+
+    fixture = File.open(File.dirname(__FILE__) + '/fixtures/amf3-ar.dat').read
+    fixture.force_encoding("ASCII-8BIT") if fixture.respond_to?(:force_encoding)
+    output.should == fixture
+    Rails3AMF::IntermediateModel::TRAIT_CACHE.length.should == 2
+
+    RocketAMF::ClassMapper.reset
+  end
+end
