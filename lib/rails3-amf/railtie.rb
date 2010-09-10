@@ -1,4 +1,4 @@
-require 'RocketAMF'
+require 'rocketamf'
 require 'rails'
 
 require 'rails3-amf/active_record'
