@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
+require 'active_record'
 
-describe "Rails3AMF activerecord additions" do
+describe Rails3AMF::Serialization do
   before :all do
     # If we replace columns, we don't need a DB connection - YEAH!!!
     class User < ActiveRecord::Base
@@ -31,22 +32,42 @@ describe "Rails3AMF activerecord additions" do
       end
     end
 
+    class AMTest
+      include ActiveModel::Serialization
+      attr_accessor :id, :username, :password
+      def attributes
+        @attributes ||= {'username' => 'nil', 'password' => 'nil'}
+      end
+    end
+
     class Rails3AMF::IntermediateModel
       attr_accessor :model, :props
     end
   end
 
   before :each do
+    # ActiveModel Object
+    @model = AMTest.new
+    @model.username = "user"
+    @model.password = "pass"
+
+    # ActiveRecord Object
     @user = User.new :username => "user", :password => "pass"
     User.stub!(:reflect_on_association).and_return(mock("association", :macro => :has_many))
     @user.stub!(:courses).and_return([Course.new(:name => "science")])
   end
 
   it "should serialize to intermediate form" do
-    intermediate = @user.to_amf
+    intermediate = @model.to_amf
     intermediate.should be_a(Rails3AMF::IntermediateModel)
-    intermediate.model.should == @user
+    intermediate.model.should == @model
     intermediate.props.should == {"username" => "user", "password" => "pass"}
+  end
+
+  it "should encode to amf properly if not yet in intermediate form" do
+    @model.should_receive(:to_amf).and_return(mock(Rails3AMF::IntermediateModel, :encode_amf => "success"))
+    result = @model.encode_amf(mock("Serializer", :version => 3))
+    result.should == "success"
   end
 
   it "should support relations in serialization" do
@@ -54,12 +75,6 @@ describe "Rails3AMF activerecord additions" do
     courses = intermediate.props["courses"]
     courses.length.should == 1
     courses[0].should be_a(Rails3AMF::IntermediateModel)
-  end
-
-  it "should encode to amf properly if not yet in intermediate form" do
-    @user.should_receive(:to_amf).and_return(mock(Rails3AMF::IntermediateModel, :encode_amf => "success"))
-    result = @user.encode_amf(mock("Serializer", :version => 3))
-    result.should == "success"
   end
 
   it "should encode to AMF0 properly" do

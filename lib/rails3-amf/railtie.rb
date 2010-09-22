@@ -1,7 +1,7 @@
 require 'rocketamf'
 require 'rails'
 
-require 'rails3-amf/active_record'
+require 'rails3-amf/serialization'
 require 'rails3-amf/action_controller'
 require 'rails3-amf/configuration'
 require 'rails3-amf/request_parser'
