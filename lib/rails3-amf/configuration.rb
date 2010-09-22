@@ -1,10 +1,28 @@
 module Rails3AMF
   class Configuration
+    class << self
+      def populate config
+        @config = config
+      end
+
+      def reset
+        Rails3AMF::Configuration.new
+      end
+
+      def method_missing name, *args
+        @config.send(name, *args)
+      end
+    end
+
     def initialize
       @data = {
-        :gateway_path => "/amf"
+        :gateway_path => "/amf",
+        :auto_class_mapping => false
       }
       @param_mappings = {}
+
+      # Make config available globally
+      Rails3AMF::Configuration.populate self
     end
 
     def class_mapping &block
@@ -23,7 +41,7 @@ module Rails3AMF
       mapped
     end
 
-    def method_missing(name, *args)
+    def method_missing name, *args
       if name.to_s =~ /(.*)=$/
         @data[$1.to_sym] = args.first
       else

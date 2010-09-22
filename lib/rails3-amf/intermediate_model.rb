@@ -17,13 +17,21 @@ module Rails3AMF
       elsif serializer.version == 3
         # Use traits to reduce overhead
         unless traits = TRAIT_CACHE[@model.class]
+          # Auto-map class name if enabled
+          class_name = RocketAMF::ClassMapper.get_as_class_name(@model)
+          if Rails3AMF::Configuration.auto_class_mapping && class_name.nil?
+            class_name = @model.class.name
+            RocketAMF::ClassMapper.define {|m| m.map :as => class_name, :rb => class_name}
+          end
+
           # For now use dynamic traits...
+          # members must be symbols in Ruby 1.9 and strings in Ruby 1.8
           traits = {
-                    :class_name => RocketAMF::ClassMapper.get_as_class_name(@model),
-                    :members => [],
-                    :externalizable => false,
-                    :dynamic => true
-                   }
+            :class_name => class_name,
+            :members => [],
+            :externalizable => false,
+            :dynamic => true
+          }
           TRAIT_CACHE[@model.class] = traits
         end
         serializer.write_custom_object @model, @props, traits

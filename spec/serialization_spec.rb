@@ -55,6 +55,10 @@ describe Rails3AMF::Serialization do
     @user = User.new :username => "user", :password => "pass"
     User.stub!(:reflect_on_association).and_return(mock("association", :macro => :has_many))
     @user.stub!(:courses).and_return([Course.new(:name => "science")])
+
+    # Resets
+    Rails3AMF::IntermediateModel::TRAIT_CACHE.clear
+    @config = Rails3AMF::Configuration.new
   end
 
   it "should serialize to intermediate form" do
@@ -75,6 +79,29 @@ describe Rails3AMF::Serialization do
     courses = intermediate.props["courses"]
     courses.length.should == 1
     courses[0].should be_a(Rails3AMF::IntermediateModel)
+  end
+
+  it "should automap classes when enabled" do
+    @config.auto_class_mapping = true
+
+    result = @model.encode_amf(mock("Serializer", :version => 3, :write_custom_object => nil))
+    traits = Rails3AMF::IntermediateModel::TRAIT_CACHE[@model.class]
+    traits[:class_name].should == "AMTest"
+
+    RocketAMF::ClassMapper.reset
+    Rails3AMF::Configuration.reset
+  end
+
+  it "should not re-map defined classes" do
+    @config.auto_class_mapping = true
+    RocketAMF::ClassMapper.define {|m| m.map :as => "Changed", :ruby => "AMTest"}
+
+    result = @model.encode_amf(mock("Serializer", :version => 3, :write_custom_object => nil))
+    traits = Rails3AMF::IntermediateModel::TRAIT_CACHE[@model.class]
+    traits[:class_name].should == "Changed"
+
+    RocketAMF::ClassMapper.reset
+    Rails3AMF::Configuration.reset
   end
 
   it "should encode to AMF0 properly" do
