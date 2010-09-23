@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Augenstein"]
-  s.date = %q{2010-08-27}
+  s.date = %q{2010-09-23}
   s.email = %q{perl.programmer@gmail.com}
-  s.files = ["README.rdoc", "Rakefile", "lib/rails3-amf/action_controller.rb", "lib/rails3-amf/active_record.rb", "lib/rails3-amf/intermediate_model.rb", "lib/rails3-amf/railtie.rb", "lib/rails3-amf/request_parser.rb", "lib/rails3-amf/request_processor.rb", "lib/rails3-amf.rb"]
+  s.files = ["README.rdoc", "Rakefile", "lib/rails3-amf/action_controller.rb", "lib/rails3-amf/configuration.rb", "lib/rails3-amf/intermediate_model.rb", "lib/rails3-amf/railtie.rb", "lib/rails3-amf/request_parser.rb", "lib/rails3-amf/request_processor.rb", "lib/rails3-amf/serialization.rb", "lib/rails3-amf.rb"]
   s.homepage = %q{http://github.com/warhammerkid/rails3-amf}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
