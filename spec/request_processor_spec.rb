@@ -5,7 +5,10 @@ describe Rails3AMF::RequestProcessor do
     def self.controller_name; 'fake'; end
     def self.action_methods; ['get_user']; end
     def dispatch action_name, request
-      [200, {}, ActionDispatch::Response.new]
+      nil
+    end
+    def amf_response
+      "it worked"
     end
   end
 
@@ -52,6 +55,7 @@ describe Rails3AMF::RequestProcessor do
     @app.should_receive(:get_service).with('FakeController', 'get_user').and_return(FakeController)
     @app.call(@env)
     @env['rails3amf.response'].constructed?.should be_true
+    @env['rails3amf.response'].messages[0].data.should == "it worked"
   end
 
   it "should handle errors in controller properly" do

@@ -22,7 +22,7 @@ module Rails3AMF
           handle_method method, args, env
         rescue Exception => e
           # Log and re-raise exception
-          @logger.error e
+          @logger.error e.to_s+"\n"+e.backtrace.join("\n")
           raise e
         end
       end
@@ -42,8 +42,9 @@ module Rails3AMF
       req.params.merge!(build_params(controller_name, method_name, args))
 
       # Run it
-      response = controller.new.dispatch(method_name, req)
-      return response[2].body_parts # Object to serialize is the body of the response
+      con = controller.new
+      res = con.dispatch(method_name, req)
+      return con.amf_response
     end
 
     def get_service controller_name, method_name
