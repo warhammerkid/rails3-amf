@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/spec_helper.rb'
+require 'spec_helper.rb'
 require 'active_record'
 
 describe Rails3AMF::Serialization do
@@ -84,7 +84,7 @@ describe Rails3AMF::Serialization do
   it "should automap classes when enabled" do
     @config.auto_class_mapping = true
 
-    result = @model.encode_amf(mock("Serializer", :version => 3, :write_custom_object => nil))
+    result = @model.encode_amf(mock("Serializer", :version => 3, :write_object => nil))
     traits = Rails3AMF::IntermediateModel::TRAIT_CACHE[@model.class]
     traits[:class_name].should == "AMTest"
 
@@ -96,7 +96,7 @@ describe Rails3AMF::Serialization do
     @config.auto_class_mapping = true
     RocketAMF::ClassMapper.define {|m| m.map :as => "Changed", :ruby => "AMTest"}
 
-    result = @model.encode_amf(mock("Serializer", :version => 3, :write_custom_object => nil))
+    result = @model.encode_amf(mock("Serializer", :version => 3, :write_object => nil))
     traits = Rails3AMF::IntermediateModel::TRAIT_CACHE[@model.class]
     traits[:class_name].should == "Changed"
 

@@ -9,11 +9,7 @@ module Rails3AMF
 
     def encode_amf serializer
       if serializer.version == 0
-        if serializer.ref_cache[@model] != nil
-          serializer.write_reference serializer.ref_cache[@model]
-        else
-          serializer.write_custom_object @model, @props
-        end
+        serializer.write_object @model, @props
       elsif serializer.version == 3
         # Use traits to reduce overhead
         unless traits = TRAIT_CACHE[@model.class]
@@ -34,7 +30,7 @@ module Rails3AMF
           }
           TRAIT_CACHE[@model.class] = traits
         end
-        serializer.write_custom_object @model, @props, traits
+        serializer.write_object @model, @props, traits
       end
     end
   end
