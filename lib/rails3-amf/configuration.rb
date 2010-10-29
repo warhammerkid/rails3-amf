@@ -17,7 +17,8 @@ module Rails3AMF
     def initialize
       @data = {
         :gateway_path => "/amf",
-        :auto_class_mapping => false
+        :auto_class_mapping => false,
+        :translate_case => false
       }
       @param_mappings = {}
 

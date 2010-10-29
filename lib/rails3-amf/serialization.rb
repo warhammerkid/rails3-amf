@@ -23,6 +23,11 @@ module Rails3AMF
         end
       end
 
+      # Passing :translate_case => false as an option will override whatever was configured globally
+      if (options.present? and options[:translate_case]) or ((options.nil? or (options.present? and options[:translate_case].nil?)) and Rails3AMF::Configuration.translate_case)
+        props = props.inject({}) {|out, (k,v)| out[k.to_s.camelize(:lower)] = v; out}
+      end
+
       # Create wrapper and return
       Rails3AMF::IntermediateModel.new(self, props)
     end
