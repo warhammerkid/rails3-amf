@@ -40,3 +40,10 @@ end
 module ActiveModel::Serialization
   include Rails3AMF::Serialization
 end
+
+# Make ActiveSupport times serialize properly
+class ActiveSupport::TimeWithZone
+  def encode_amf serializer
+    serializer.serialize self.to_datetime
+  end
+end
