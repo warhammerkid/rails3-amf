@@ -47,3 +47,10 @@ class ActiveSupport::TimeWithZone
     serializer.serialize self.to_datetime
   end
 end
+
+# Map array to_amf calls to each element
+class Array
+  def to_amf options=nil
+    self.map {|o| o.to_amf(options)}
+  end
+end
