@@ -13,7 +13,7 @@ lines to your gemfile. RocketAMF will need to be pulled from git for now, as
 there are several necessary updates that have been made to it to allow
 rails3-amf to work properly.
 
-  gem 'RocketAMF', :git => 'git://github.com/warhammerkid/rocket-amf.git'
+  gem 'RocketAMF', :git => 'git://github.com/rubyamf/rocketamf.git'
   gem 'rails3-amf', :git => 'git://github.com/warhammerkid/rails3-amf.git'
 
 Then, make sure that your controller will respond to amf by adding <tt>:amf</tt>
