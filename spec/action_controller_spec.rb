@@ -6,6 +6,6 @@ describe "Rails3AMF actionpack additions" do
   end
 
   it "should have amf renderer" do
-    ActionController::Renderers::RENDERERS.key?(:amf).should be_true
+    ActionController::Renderers::RENDERERS.include?(:amf).should be_true
   end
 end

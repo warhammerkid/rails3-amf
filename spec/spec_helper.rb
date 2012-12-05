@@ -1,6 +1,5 @@
 require 'rubygems'
-require 'spec'
-require 'spec/autorun'
+require 'rspec'
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 
