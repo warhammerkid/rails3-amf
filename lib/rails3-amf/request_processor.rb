@@ -51,7 +51,7 @@ module Rails3AMF
       # Check controller and validate against hacking attempts
       begin
         raise "not controller" unless controller_name =~ /^[A-Za-z:]+Controller$/
-        controller = ActiveSupport::Dependencies.ref(controller_name).get
+        controller = ActiveSupport::Dependencies.reference(controller_name).get(controller_name)
         raise "not controller" unless controller.respond_to?(:controller_name) && controller.respond_to?(:action_methods)
       rescue Exception => e
         raise "Service #{controller_name} does not exist"
